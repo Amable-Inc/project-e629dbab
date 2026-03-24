@@ -1,0 +1,36 @@
+[
+  {
+    "id": "score-1",
+    "farmerId": "farmer-1",
+    "score": 68,
+    "riskLevel": "medio",
+    "totalPlots": 3,
+    "totalHectares": 12.5,
+    "preventionActionsCount": 8,
+    "avgNdvi": 0.68,
+    "certifiedSeedsPercentage": 66.67,
+    "daysSinceLastReport": 5,
+    "climateResilienceScore": 35,
+    "financialCommitmentScore": 20,
+    "calculationDetails": {
+      "climateResilienceBreakdown": {
+        "reportFrequency": 12,
+        "avgNdviScore": 15,
+        "certifiedSeedsScore": 8
+      },
+      "financialCommitmentBreakdown": {
+        "investmentScore": 15,
+        "diversityScore": 5
+      },
+      "consistencyBreakdown": {
+        "recencyScore": 10,
+        "scaleScore": 7
+      },
+      "totalInvestment": 2525000,
+      "uniqueActionTypes": 3
+    },
+    "calculatedAt": "2024-01-15T10:00:00Z",
+    "validUntil": "2024-04-15T10:00:00Z",
+    "createdAt": "2024-01-15T10:00:00Z"
+  }
+]

@@ -1,29 +1,27 @@
-# 🌱 AgroCredit - Plataforma de Crédito Verde para Agricultores
+# 🌱 AgroCredit - MVP Plataforma de Crédito Verde (Solo Frontend)
 
-## 📋 Descripción del Proyecto
+## 📋 Descripción
 
-AgroCredit es una plataforma AgTech/FinTech que actúa como puente de "De-risking" entre agricultores y entidades financieras. Permite a los agricultores registrar sus prácticas preventivas de cultivo y generar un **Green Credit Score** auditable que facilita el acceso a créditos agrícolas.
+**AgroCredit** es una plataforma AgTech/FinTech que democratiza el acceso al crédito agrícola mediante un **Green Credit Score** calculado a partir de prácticas preventivas de cultivo.
 
-### El Problema
-Los agricultores no acceden a créditos porque los bancos consideran la agricultura de alto riesgo debido a plagas, desastres naturales y falta de documentación de prácticas responsables.
-
-### La Solución
-Una WebApp Mobile-First que:
-- ✅ Registra prácticas de prevención (control de plagas, semillas certificadas, acciones climáticas)
-- ✅ Integra datos de salud del cultivo (índice NDVI simulado)
-- ✅ Genera un puntaje de resiliencia climática (0-100)
-- ✅ Proporciona reportes auditables para instituciones financieras
-- ✅ Reduce la percepción de riesgo mediante evidencia cuantificable
+Este MVP es **100% frontend** con datos simulados en JSON (sin backend).
 
 ---
 
-## 🛠️ Stack Tecnológico
+## 🚀 Inicio Rápido
 
-- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS v4
-- **Backend**: Supabase (PostgreSQL, Auth, Storage, RLS)
-- **UI Components**: Custom mobile-first components
-- **Icons**: Lucide React
+```bash
+# Instalar dependencias
+npm install
+
+# Ejecutar en desarrollo
+npm run dev
+
+# Abrir navegador
+http://localhost:3000
+```
+
+¡Listo! La aplicación funciona con datos mock.
 
 ---
 
@@ -32,295 +30,252 @@ Una WebApp Mobile-First que:
 ```
 project/
 ├── app/
-│   ├── layout.tsx              # Layout raíz con metadata mobile-first
-│   ├── page.tsx                # Dashboard del agricultor
-│   ├── reporte/
-│   │   └── page.tsx            # Formulario de reporte de campo
-│   └── banco/
-│       └── page.tsx            # Vista ejecutiva para bancos
+│   ├── page.tsx              # Dashboard del agricultor
+│   ├── reporte/page.tsx      # Formulario de reportes
+│   ├── perfil/page.tsx       # Perfil del agricultor
+│   ├── compartir/page.tsx    # Tokens de acceso bancario
+│   └── banco/page.tsx        # Vista ejecutiva bancos
 │
 ├── components/
-│   ├── credit-meter.tsx        # Termómetro de crédito visual
-│   ├── field-report-form.tsx   # Formulario optimizado mobile
-│   └── risk-card.tsx           # Card de reporte de mitigación
+│   ├── credit-meter.tsx      # Termómetro de crédito
+│   ├── field-report-form.tsx # Formulario de reportes
+│   └── risk-card.tsx         # Card de actividad
 │
-├── lib/
-│   ├── supabase.ts             # Cliente Supabase + TypeScript types
-│   ├── green-score.ts          # Lógica de cálculo del Green Score
-│   └── utils.ts                # Utilidades generales
+├── data/                     # Base de datos JSON mock
+│   ├── farmers.json
+│   ├── plots.json
+│   ├── risk-logs.json
+│   ├── credit-scores.json
+│   └── bank-tokens.json
 │
-├── supabase/
-│   └── schema.sql              # Schema completo de la base de datos
-│
-└── public/                     # Assets estáticos
+└── lib/
+    ├── db.ts                 # API simulada (CRUD)
+    └── utils.ts
 ```
 
 ---
 
-## 🚀 Setup e Instalación
+## 🎯 Funcionalidades
 
-### 1. Clonar el repositorio
-```bash
-git clone <repository-url>
-cd project
-```
+### Para Agricultores
 
-### 2. Instalar dependencias
-```bash
-npm install
-```
+#### 1. Dashboard (`/`)
+- Ver **Green Credit Score** (0-100)
+- Alertas climáticas
+- Reportes recientes
+- Métricas de actividad
 
-### 3. Configurar Supabase
+#### 2. Nuevo Reporte (`/reporte`)
+- Seleccionar parcela
+- Tipo de acción (plagas, clima, prevención)
+- Subir foto de evidencia
+- Nivel de severidad (1-5)
+- Índice NDVI (salud del cultivo)
+- Costo de la acción
 
-#### A. Crear proyecto en Supabase
-1. Ve a [supabase.com](https://supabase.com)
-2. Crea un nuevo proyecto
-3. Copia las credenciales (URL y Anon Key)
+#### 3. Mi Perfil (`/perfil`)
+- Información personal
+- Datos de la finca
+- Gestión de parcelas
+- Estadísticas de membresía
 
-#### B. Ejecutar el schema SQL
-1. Abre el SQL Editor en tu dashboard de Supabase
-2. Copia el contenido de `supabase/schema.sql`
-3. Ejecuta el script completo
+#### 4. Compartir (`/compartir`)
+- Generar tokens de acceso bancario
+- Copiar tokens
+- Revocar acceso
+- Ver accesos realizados
 
-Esto creará:
-- ✅ Tablas: `farmers`, `plots`, `risk_logs`, `credit_scores`, `bank_access_tokens`
-- ✅ Políticas de Row Level Security (RLS)
-- ✅ Índices para performance
-- ✅ Funciones y triggers automatizados
+### Para Bancos
 
-#### C. Configurar variables de entorno
-```bash
-cp .env.local.example .env.local
-```
-
-Edita `.env.local`:
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-```
-
-### 4. Ejecutar el proyecto
-```bash
-npm run dev
-```
-
-Abre [http://localhost:3000](http://localhost:3000)
+#### Vista Banco (`/banco`)
+- Acceso mediante token
+- Perfil completo del agricultor
+- Green Credit Score desglosado
+- Historial de inversiones
+- Recomendación de crédito
 
 ---
 
-## 🗄️ Base de Datos - Esquema
+## 💾 Base de Datos JSON
 
-### Tablas Principales
+### Datos Mock Incluidos
 
-#### `farmers` - Perfil del Agricultor
-```sql
-- id (UUID, PK)
-- user_id (UUID, FK a auth.users)
-- full_name (VARCHAR)
-- farm_name (VARCHAR)
-- latitude, longitude (DECIMAL) - Geolocalización
-- municipality, department (VARCHAR)
-- risk_zone_level (INTEGER 1-5) - Nivel de riesgo de la zona
+**Agricultores:** 2 perfiles
+- Juan Pérez García (Finca El Progreso)
+- María González (Finca La Esperanza)
+
+**Parcelas:** 3 lotes
+- Lote Norte (Arroz, 5 ha)
+- Lote Sur (Maíz, 4.5 ha)
+- Parcela Este (Café, 3 ha)
+
+**Reportes:** 8 registros de mitigación
+- Control de plagas
+- Prevención de enfermedades
+- Acciones climáticas
+
+**Tokens:** 2 tokens activos
+- Banco Agrario
+- Bancolombia
+
+### API Simulada (`lib/db.ts`)
+
+```typescript
+import { db } from '@/lib/db';
+
+// Obtener agricultor
+const farmer = await db.getFarmer('farmer-1');
+
+// Parcelas por agricultor
+const plots = await db.getPlotsByFarmerId('farmer-1');
+
+// Reportes recientes
+const logs = await db.getRiskLogsByFarmerId('farmer-1', 5);
+
+// Credit Score
+const score = await db.getCreditScoreByFarmerId('farmer-1');
+
+// Crear nuevo reporte
+await db.createRiskLog({
+  plotId: 'plot-1',
+  farmerId: 'farmer-1',
+  logType: 'pest_control',
+  description: 'Control de plagas...',
+  cost: 350000,
+  ndviIndex: 0.68,
+  loggedAt: new Date().toISOString(),
+});
 ```
-
-#### `plots` - Parcelas de Cultivo
-```sql
-- id (UUID, PK)
-- farmer_id (UUID, FK)
-- plot_name (VARCHAR)
-- hectares (DECIMAL)
-- crop_type (VARCHAR) - Ej: 'arroz', 'maíz', 'café'
-- certified_seeds (BOOLEAN)
-- planting_date, expected_harvest_date (DATE)
-```
-
-#### `risk_logs` - Registros de Mitigación
-```sql
-- id (UUID, PK)
-- plot_id, farmer_id (UUID, FK)
-- log_type (VARCHAR) - 'pest_control', 'disease_prevention', 'climate_action'
-- description (TEXT)
-- photo_url (TEXT) - URL en Supabase Storage
-- severity_level (INTEGER 1-5)
-- action_taken (TEXT)
-- cost (DECIMAL) - Inversión en la acción preventiva
-- ndvi_index (DECIMAL 0-1) - Índice de salud del cultivo
-- logged_at (TIMESTAMP)
-```
-
-#### `credit_scores` - Puntajes Calculados
-```sql
-- id (UUID, PK)
-- farmer_id (UUID, FK)
-- score (INTEGER 0-100)
-- risk_level ('bajo', 'medio', 'alto')
-- climate_resilience_score (DECIMAL)
-- financial_commitment_score (DECIMAL)
-- avg_ndvi (DECIMAL)
-- calculation_details (JSONB) - Metadata del cálculo
-- calculated_at, valid_until (TIMESTAMP)
-```
-
-### Seguridad (RLS)
-Todas las tablas tienen **Row Level Security** habilitado:
-- Los agricultores solo ven sus propios datos
-- Los bancos acceden mediante tokens temporales
-- Políticas de INSERT/UPDATE/DELETE restringidas por `user_id`
 
 ---
 
-## 🧮 Green Credit Score Algorithm
+## 🧮 Algoritmo Green Credit Score
 
-El algoritmo calcula un puntaje de 0-100 basado en tres pilares:
+### Cálculo Automático (0-100)
 
-### A. Climate Resilience Score (0-50 pts)
-- **Frecuencia de reportes** (0-15 pts): ≥12 reportes = 15 pts
-- **NDVI promedio** (0-20 pts): ≥0.7 = 20 pts (cultivo saludable)
-- **Semillas certificadas** (0-15 pts): ≥80% parcelas = 15 pts
+**Resiliencia Climática (0-50 pts)**
+- Frecuencia de reportes: 0-15 pts
+- NDVI promedio: 0-20 pts
+- Semillas certificadas: 0-15 pts
 
-### B. Financial Commitment Score (0-30 pts)
-- **Inversión en prevención** (0-20 pts): ≥$2M COP = 20 pts
-- **Diversidad de acciones** (0-10 pts): ≥3 tipos diferentes = 10 pts
+**Compromiso Financiero (0-30 pts)**
+- Inversión en prevención: 0-20 pts
+- Diversidad de acciones: 0-10 pts
 
-### C. Consistency Score (0-20 pts)
-- **Días desde último reporte** (0-10 pts): ≤7 días = 10 pts
-- **Extensión monitoreada** (0-10 pts): ≥10 ha = 10 pts
+**Consistencia (0-20 pts)**
+- Días desde último reporte: 0-10 pts
+- Extensión monitoreada: 0-10 pts
 
 ### Niveles de Riesgo
-- **70-100**: Riesgo Bajo ✅ (Alta probabilidad de aprobación)
-- **40-69**: Riesgo Medio ⚠️ (Requiere acompañamiento)
-- **0-39**: Riesgo Alto ❌ (Mejorar actividad preventiva)
 
-### Uso
-```typescript
-import { calculateGreenScore, saveGreenScore } from '@/lib/green-score';
-
-const result = await calculateGreenScore({ farmerId: 'uuid-here' });
-console.log(result.score); // 68
-console.log(result.riskLevel); // 'medio'
-
-// Guardar en DB
-await saveGreenScore(farmerId, result);
-```
-
----
-
-## 📱 Componentes UI Principales
-
-### 1. `<CreditMeter />`
-Termómetro visual del puntaje de crédito
-```tsx
-<CreditMeter score={68} riskLevel="medio" />
-```
-
-### 2. `<FieldReportForm />`
-Formulario mobile-optimized para reportes de campo
-- Upload de fotos con vista previa
-- Sliders para severidad y NDVI
-- Validación inline
-
-### 3. `<RiskCard />`
-Card de visualización de reportes previos
-- Iconos por tipo de acción
-- Métricas de inversión y NDVI
-- Timeline de actividad
-
----
-
-## 🔄 Flujo de Usuario
-
-### Agricultor
-1. **Login** → Crea perfil y registra parcelas
-2. **Dashboard** → Ve su Green Score actual y alertas
-3. **Nuevo Reporte** → Registra acción preventiva (foto + datos)
-4. **Score Actualizado** → El algoritmo recalcula automáticamente
-5. **Compartir con Banco** → Genera token de acceso temporal
-
-### Banco/Inversor
-1. **Acceso via Token** → Ingresa código del agricultor
-2. **Vista Ejecutiva** → Ve score, historial, inversión
-3. **Análisis de Riesgo** → Evalúa prácticas y consistencia
-4. **Decisión** → Aprueba o rechaza con data cuantificable
-
----
-
-## 🚧 Próximas Funcionalidades
-
-- [ ] **Autenticación Supabase Auth** (actualmente mock)
-- [ ] **Upload real a Supabase Storage**
-- [ ] **Integración con APIs de clima** (IDEAM, OpenWeather)
-- [ ] **Geolocalización real** con Google Maps
-- [ ] **Cálculo NDVI real** via imágenes satelitales (Sentinel-2)
-- [ ] **Notificaciones push** para alertas
-- [ ] **Dashboard bancario avanzado** con gráficos
-- [ ] **Exportación PDF** de reportes
-- [ ] **Integración con scoring crediticio tradicional**
+| Puntaje | Riesgo | Color |
+|---------|--------|-------|
+| 70-100 | Bajo | 🟢 Verde |
+| 40-69 | Medio | 🟡 Amarillo |
+| 0-39 | Alto | 🔴 Rojo |
 
 ---
 
 ## 🎨 Diseño Mobile-First
 
 La plataforma está optimizada para usuarios rurales:
-- ✅ Botones grandes (≥44px altura)
-- ✅ Alto contraste para lectura en exteriores
-- ✅ Formularios simplificados
-- ✅ Capture de cámara optimizado
-- ✅ Funcionamiento offline (próximamente)
-- ✅ Textos claros en español
-- ✅ Navegación por tabs inferiores
+- ✅ Botones grandes (≥44px)
+- ✅ Alto contraste
+- ✅ Navegación intuitiva
+- ✅ Íconos visuales
+- ✅ Optimizado para pantallas 320px+
 
 ---
 
-## 📊 Métricas de Impacto
+## 🧪 Testing
 
-### Para Agricultores
-- Incremento de aprobación crediticia del **15%** al **70%**
-- Reducción de tiempo de evaluación de 30 a 5 días
-- Historial auditable de buenas prácticas
+### Datos de Prueba
 
-### Para Bancos
-- Reducción de morosidad del **22%** al **8%**
-- Decisiones basadas en data cuantificable
-- Cumplimiento ESG y financiamiento verde
+**Usuario Agricultor:**
+- ID: `farmer-1`
+- Nombre: Juan Pérez García
+- Finca: El Progreso
+- Score actual: 68/100 (Riesgo Medio)
+
+**Tokens Bancarios Válidos:**
+```
+a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6  (Banco Agrario)
+x9y8z7w6v5u4t3s2r1q0p9o8n7m6l5k4  (Bancolombia)
+```
+
+### Flujo de Testing
+
+1. **Dashboard**: Ver score y alertas
+2. **Nuevo Reporte**: Llenar formulario y enviar
+3. **Perfil**: Editar información
+4. **Compartir**: Generar nuevo token
+5. **Banco**: Ingresar token y ver perfil
 
 ---
 
-## 🤝 Contribuir
+## 🛠️ Stack Tecnológico
+
+- **Framework**: Next.js 16 (App Router)
+- **UI**: React 19 + TypeScript
+- **Styling**: Tailwind CSS v4
+- **Icons**: Lucide React
+- **Data**: JSON local (simulación)
+
+---
+
+## 📦 Scripts Disponibles
 
 ```bash
-# Fork el proyecto
-# Crea una rama feature
-git checkout -b feature/nueva-funcionalidad
+# Desarrollo
+npm run dev
 
-# Commit con mensaje descriptivo
-git commit -m "feat: agregar cálculo NDVI real"
+# Build producción
+npm run build
 
-# Push y crea Pull Request
-git push origin feature/nueva-funcionalidad
+# Ejecutar producción
+npm start
+
+# Linter
+npm run lint
 ```
+
+---
+
+## 🔄 Próximos Pasos (Backend Real)
+
+Para migrar a producción con backend:
+
+1. **Instalar Supabase**
+   ```bash
+   npm install @supabase/supabase-js
+   ```
+
+2. **Reemplazar `lib/db.ts`** con cliente Supabase
+
+3. **Migrar JSON a PostgreSQL**
+   - Ejecutar schema SQL
+   - Importar datos iniciales
+
+4. **Configurar Storage** para fotos
+
+5. **Agregar Auth** (SMS/Email)
+
+Ver: `DEPLOYMENT.md` para guía completa.
+
+---
+
+## 📞 Soporte
+
+- **Documentación**: Ver `USER_GUIDE.md`
+- **Arquitectura**: Ver `ARCHITECTURE.md`
+- **Deployment**: Ver `DEPLOYMENT.md`
+- **Pitch**: Ver `EXECUTIVE_SUMMARY.md`
 
 ---
 
 ## 📄 Licencia
 
-MIT License - Ver `LICENSE` para más detalles
-
----
-
-## 📧 Contacto
-
-Para preguntas técnicas o de implementación:
-- Email: agrocredit@example.com
-- Documentación: [docs.agrocredit.co](https://docs.agrocredit.co)
-
----
-
-## 🌟 Recursos Adicionales
-
-- [Supabase Docs](https://supabase.com/docs)
-- [Next.js 16 Docs](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com)
-- [NDVI Explained](https://gisgeography.com/ndvi-normalized-difference-vegetation-index/)
+MIT License
 
 ---
 

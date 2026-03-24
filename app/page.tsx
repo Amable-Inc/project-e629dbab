@@ -5,64 +5,44 @@ import { AlertCircle, TrendingUp, Leaf, Plus } from 'lucide-react';
 import CreditMeter from '@/components/credit-meter';
 import RiskCard from '@/components/risk-card';
 import Link from 'next/link';
-
-// Mock data (en producción vendría de Supabase)
-const mockCreditScore = {
-  score: 68,
-  riskLevel: 'medio' as const,
-  climateResilienceScore: 35,
-  financialCommitmentScore: 20,
-  preventionActionsCount: 8,
-  avgNdvi: 0.65,
-  certifiedSeedsPercentage: 50,
-  daysSinceLastReport: 12,
-};
-
-const mockRecentLogs = [
-  {
-    id: '1',
-    logType: 'pest_control' as const,
-    description: 'Detección temprana de gusano cogollero en 2 hectáreas. Aplicación inmediata de control biológico.',
-    actionTaken: 'Aspersión de Bacillus thuringiensis',
-    cost: 350000,
-    ndviIndex: 0.68,
-    loggedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    severityLevel: 3,
-  },
-  {
-    id: '2',
-    logType: 'climate_action' as const,
-    description: 'Preparación ante alerta de heladas. Instalación de sistema de protección nocturna.',
-    actionTaken: 'Cobertura con malla anti-heladas',
-    cost: 580000,
-    ndviIndex: 0.72,
-    loggedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
-    severityLevel: 4,
-  },
-];
-
-const mockAlerts = [
-  {
-    id: '1',
-    type: 'weather',
-    message: 'Lluvias intensas esperadas para el fin de semana',
-    urgency: 'media',
-  },
-  {
-    id: '2',
-    type: 'action',
-    message: 'Hace 12 días desde tu último reporte. Mantén tu puntaje activo.',
-    urgency: 'baja',
-  },
-];
+import { db, type CreditScore, type RiskLog } from '@/lib/db';
 
 export default function Dashboard() {
   const [farmerName, setFarmerName] = useState('Agricultor');
+  const [creditScore, setCreditScore] = useState<CreditScore | null>(null);
+  const [recentLogs, setRecentLogs] = useState<RiskLog[]>([]);
 
   useEffect(() => {
-    // En producción: cargar datos del usuario desde Supabase
-    setFarmerName('Juan Pérez');
+    // Cargar datos del agricultor actual (simulado)
+    const currentFarmerId = 'farmer-1';
+    
+    db.getFarmer(currentFarmerId).then(farmer => {
+      if (farmer) setFarmerName(farmer.fullName);
+    });
+
+    db.getCreditScoreByFarmerId(currentFarmerId).then(score => {
+      setCreditScore(score);
+    });
+
+    db.getRiskLogsByFarmerId(currentFarmerId, 3).then(logs => {
+      setRecentLogs(logs);
+    });
   }, []);
+
+  const mockAlerts = [
+    {
+      id: '1',
+      type: 'weather',
+      message: 'Lluvias intensas esperadas para el fin de semana',
+      urgency: 'media',
+    },
+    {
+      id: '2',
+      type: 'action',
+      message: `Hace ${creditScore?.daysSinceLastReport || 0} días desde tu último reporte. Mantén tu puntaje activo.`,
+      urgency: 'baja',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -106,35 +86,39 @@ export default function Dashboard() {
         )}
 
         {/* Credit Meter */}
-        <CreditMeter
-          score={mockCreditScore.score}
-          riskLevel={mockCreditScore.riskLevel}
-        />
+        {creditScore && (
+          <CreditMeter
+            score={creditScore.score}
+            riskLevel={creditScore.riskLevel}
+          />
+        )}
 
         {/* Métricas Rápidas */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-white rounded-xl shadow-md p-5 border-2 border-gray-100">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-              <span className="text-sm text-gray-600">Reportes</span>
+        {creditScore && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl shadow-md p-5 border-2 border-gray-100">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-green-600" />
+                <span className="text-sm text-gray-600">Reportes</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-800">
+                {creditScore.preventionActionsCount}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Últimos 6 meses</p>
             </div>
-            <p className="text-3xl font-bold text-gray-800">
-              {mockCreditScore.preventionActionsCount}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Últimos 6 meses</p>
-          </div>
 
-          <div className="bg-white rounded-xl shadow-md p-5 border-2 border-gray-100">
-            <div className="flex items-center gap-2 mb-2">
-              <Leaf className="w-5 h-5 text-green-600" />
-              <span className="text-sm text-gray-600">NDVI Prom.</span>
+            <div className="bg-white rounded-xl shadow-md p-5 border-2 border-gray-100">
+              <div className="flex items-center gap-2 mb-2">
+                <Leaf className="w-5 h-5 text-green-600" />
+                <span className="text-sm text-gray-600">NDVI Prom.</span>
+              </div>
+              <p className="text-3xl font-bold text-gray-800">
+                {creditScore.avgNdvi?.toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">Salud del cultivo</p>
             </div>
-            <p className="text-3xl font-bold text-gray-800">
-              {mockCreditScore.avgNdvi.toFixed(2)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Salud del cultivo</p>
           </div>
-        </div>
+        )}
 
         {/* CTA: Nuevo Reporte */}
         <Link href="/reporte">
@@ -150,7 +134,7 @@ export default function Dashboard() {
             Reportes Recientes
           </h2>
           <div className="space-y-4">
-            {mockRecentLogs.map((log) => (
+            {recentLogs.map((log) => (
               <RiskCard key={log.id} {...log} />
             ))}
           </div>

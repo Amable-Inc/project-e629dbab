@@ -1,31 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Edit, MapPin, Phone, Mail, Leaf } from 'lucide-react';
 import Link from 'next/link';
-
-// Mock data
-const mockFarmer = {
-  fullName: 'Juan Pérez García',
-  phone: '+57 300 123 4567',
-  email: 'juan.perez@ejemplo.com',
-  documentId: '1234567890',
-  farmName: 'Finca El Progreso',
-  farmAddress: 'Vereda Las Flores, Km 8',
-  municipality: 'Montería',
-  department: 'Córdoba',
-  riskZoneLevel: 2,
-  memberSince: '2023-03-15',
-};
-
-const mockPlots = [
-  { id: '1', plotName: 'Lote Norte', hectares: 5, cropType: 'Arroz', certifiedSeeds: true },
-  { id: '2', plotName: 'Lote Sur', hectares: 4.5, cropType: 'Maíz', certifiedSeeds: true },
-  { id: '3', plotName: 'Parcela Este', hectares: 3, cropType: 'Café', certifiedSeeds: false },
-];
+import { db, type Farmer, type Plot } from '@/lib/db';
 
 export default function PerfilPage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [farmer, setFarmer] = useState<Farmer | null>(null);
+  const [plots, setPlots] = useState<Plot[]>([]);
+
+  useEffect(() => {
+    const currentFarmerId = 'farmer-1';
+    
+    db.getFarmer(currentFarmerId).then(setFarmer);
+    db.getPlotsByFarmerId(currentFarmerId).then(setPlots);
+  }, []);
+
+  if (!farmer) return <div>Cargando...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -63,7 +55,7 @@ export default function PerfilPage() {
               <input
                 type="text"
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                value={mockFarmer.fullName}
+                value={farmer.fullName}
                 disabled={!isEditing}
               />
             </div>
@@ -73,7 +65,7 @@ export default function PerfilPage() {
               <input
                 type="text"
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                value={mockFarmer.documentId}
+                value={farmer.documentId || ''}
                 disabled={!isEditing}
               />
             </div>
@@ -87,7 +79,7 @@ export default function PerfilPage() {
                 <input
                   type="tel"
                   className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                  value={mockFarmer.phone}
+                  value={farmer.phone || ''}
                   disabled={!isEditing}
                 />
               </div>
@@ -100,7 +92,7 @@ export default function PerfilPage() {
                 <input
                   type="email"
                   className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                  value={mockFarmer.email}
+                  value={farmer.email || ''}
                   disabled={!isEditing}
                 />
               </div>
@@ -118,7 +110,7 @@ export default function PerfilPage() {
               <input
                 type="text"
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                value={mockFarmer.farmName}
+                value={farmer.farmName || ''}
                 disabled={!isEditing}
               />
             </div>
@@ -131,7 +123,7 @@ export default function PerfilPage() {
               <input
                 type="text"
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                value={mockFarmer.farmAddress}
+                value={farmer.farmAddress || ''}
                 disabled={!isEditing}
               />
             </div>
@@ -142,7 +134,7 @@ export default function PerfilPage() {
                 <input
                   type="text"
                   className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                  value={mockFarmer.municipality}
+                  value={farmer.municipality || ''}
                   disabled={!isEditing}
                 />
               </div>
@@ -152,7 +144,7 @@ export default function PerfilPage() {
                 <input
                   type="text"
                   className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50"
-                  value={mockFarmer.department}
+                  value={farmer.department || ''}
                   disabled={!isEditing}
                 />
               </div>
@@ -160,7 +152,7 @@ export default function PerfilPage() {
 
             <div className="p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
               <p className="text-sm text-yellow-800">
-                <span className="font-semibold">Zona de Riesgo:</span> Nivel {mockFarmer.riskZoneLevel}/5
+                <span className="font-semibold">Zona de Riesgo:</span> Nivel {farmer.riskZoneLevel}/5
               </p>
               <p className="text-xs text-yellow-600 mt-1">
                 Basado en histórico de desastres naturales en tu región
@@ -179,7 +171,7 @@ export default function PerfilPage() {
           </div>
 
           <div className="space-y-3">
-            {mockPlots.map((plot) => (
+            {plots.map((plot) => (
               <div key={plot.id} className="p-4 border-2 border-gray-200 rounded-xl hover:border-green-400 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3">
@@ -203,7 +195,7 @@ export default function PerfilPage() {
 
           <div className="mt-4 p-4 bg-blue-50 rounded-xl">
             <p className="text-sm text-blue-800">
-              <span className="font-semibold">Total:</span> {mockPlots.length} parcelas, {mockPlots.reduce((sum, p) => sum + p.hectares, 0)} hectáreas
+              <span className="font-semibold">Total:</span> {plots.length} parcelas, {plots.reduce((sum, p) => sum + p.hectares, 0)} hectáreas
             </p>
           </div>
         </div>
@@ -212,13 +204,13 @@ export default function PerfilPage() {
         <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-2xl shadow-lg p-6">
           <h3 className="text-lg font-bold mb-3">Miembro desde</h3>
           <p className="text-3xl font-bold">
-            {new Date(mockFarmer.memberSince).toLocaleDateString('es-CO', {
+            {new Date(farmer.createdAt).toLocaleDateString('es-CO', {
               month: 'long',
               year: 'numeric',
             })}
           </p>
           <p className="text-green-100 text-sm mt-2">
-            {Math.floor((Date.now() - new Date(mockFarmer.memberSince).getTime()) / (1000 * 60 * 60 * 24))} días contribuyendo al ecosistema AgroCredit
+            {Math.floor((Date.now() - new Date(farmer.createdAt).getTime()) / (1000 * 60 * 60 * 24))} días contribuyendo al ecosistema AgroCredit
           </p>
         </div>
 

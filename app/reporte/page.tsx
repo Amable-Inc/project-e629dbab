@@ -1,45 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import FieldReportForm, { FieldReportData } from '@/components/field-report-form';
-
-// Mock plots data
-const mockPlots = [
-  { id: '1', plot_name: 'Lote Norte', crop_type: 'Arroz' },
-  { id: '2', plot_name: 'Lote Sur', crop_type: 'Maíz' },
-  { id: '3', plot_name: 'Parcela Este', crop_type: 'Café' },
-];
+import { db, type Plot } from '@/lib/db';
 
 export default function ReportePage() {
+  const router = useRouter();
+  const [plots, setPlots] = useState<Plot[]>([]);
+
+  useEffect(() => {
+    // Cargar parcelas del agricultor actual
+    const currentFarmerId = 'farmer-1';
+    db.getPlotsByFarmerId(currentFarmerId).then(setPlots);
+  }, []);
+
   const handleSubmit = async (data: FieldReportData) => {
-    // En producción: enviar a Supabase
-    console.log('Datos del reporte:', data);
-    
-    // Simular upload de foto
-    if (data.photoFile) {
-      console.log('Subiendo foto:', data.photoFile.name);
-      // const { data: uploadData, error } = await supabase.storage
-      //   .from('risk-logs')
-      //   .upload(`${farmerId}/${Date.now()}-${photoFile.name}`, photoFile);
-    }
+    // Simular guardado en DB
+    await db.createRiskLog({
+      plotId: data.plotId,
+      farmerId: 'farmer-1',
+      logType: data.logType,
+      description: data.description,
+      severityLevel: data.severityLevel,
+      actionTaken: data.actionTaken,
+      cost: data.cost,
+      ndviIndex: data.ndviIndex,
+      photoUrl: data.photoFile ? URL.createObjectURL(data.photoFile) : undefined,
+      loggedAt: new Date().toISOString(),
+    });
 
-    // Insertar en risk_logs
-    // const { error } = await supabase.from('risk_logs').insert({
-    //   plot_id: data.plotId,
-    //   farmer_id: farmerId,
-    //   log_type: data.logType,
-    //   description: data.description,
-    //   severity_level: data.severityLevel,
-    //   action_taken: data.actionTaken,
-    //   cost: data.cost,
-    //   ndvi_index: data.ndviIndex,
-    //   photo_url: uploadData?.path,
-    // });
-
-    // Esperar 1 segundo para simular envío
+    // Esperar 1 segundo para simular
     await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Redirigir al dashboard
+    router.push('/');
   };
 
   return (
@@ -70,7 +67,14 @@ export default function ReportePage() {
         </div>
 
         {/* Form */}
-        <FieldReportForm onSubmit={handleSubmit} plots={mockPlots} />
+        <FieldReportForm 
+          onSubmit={handleSubmit} 
+          plots={plots.map(p => ({ 
+            id: p.id, 
+            plot_name: p.plotName, 
+            crop_type: p.cropType 
+          }))} 
+        />
 
         {/* Info Footer */}
         <div className="mt-6 p-5 bg-white rounded-xl shadow-md border-2 border-gray-100">

@@ -1,56 +1,49 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Building2, CheckCircle, XCircle, TrendingUp, MapPin, Calendar } from 'lucide-react';
-
-// Mock data para vista del banco
-const mockFarmerProfile = {
-  fullName: 'Juan Pérez García',
-  farmName: 'Finca El Progreso',
-  municipality: 'Montería',
-  department: 'Córdoba',
-  riskZoneLevel: 2,
-  totalPlots: 3,
-  totalHectares: 12.5,
-  memberSince: '2023-03-15',
-  
-  creditScore: {
-    score: 68,
-    riskLevel: 'medio' as const,
-    climateResilienceScore: 35,
-    financialCommitmentScore: 20,
-    preventionActionsCount: 8,
-    avgNdvi: 0.65,
-    certifiedSeedsPercentage: 50,
-    daysSinceLastReport: 12,
-    calculatedAt: new Date().toISOString(),
-  },
-  
-  plots: [
-    { name: 'Lote Norte', hectares: 5, cropType: 'Arroz', certifiedSeeds: true },
-    { name: 'Lote Sur', hectares: 4.5, cropType: 'Maíz', certifiedSeeds: true },
-    { name: 'Parcela Este', hectares: 3, cropType: 'Café', certifiedSeeds: false },
-  ],
-  
-  recentActivity: [
-    { date: '2024-01-15', action: 'Control de plagas', investment: 350000 },
-    { date: '2024-01-03', action: 'Protección climática', investment: 580000 },
-    { date: '2023-12-20', action: 'Prevención de enfermedades', investment: 220000 },
-  ],
-};
+import { Building2, CheckCircle, XCircle, TrendingUp, MapPin } from 'lucide-react';
+import { db, type Farmer, type Plot, type CreditScore, type RiskLog } from '@/lib/db';
 
 export default function BankViewPage() {
   const [token, setToken] = useState('');
   const [isValidToken, setIsValidToken] = useState(false);
-  const [profile, setProfile] = useState(mockFarmerProfile);
+  const [profile, setProfile] = useState<{
+    farmer: Farmer;
+    plots: Plot[];
+    creditScore: CreditScore;
+    recentActivity: RiskLog[];
+  } | null>(null);
 
-  const handleTokenSubmit = (e: React.FormEvent) => {
+  const handleTokenSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // En producción: validar token contra Supabase
-    if (token.length > 10) {
+    
+    // Verificar token
+    const tokenData = await db.getTokenByValue(token);
+    if (!tokenData || !tokenData.isActive) {
+      alert('Token inválido o expirado');
+      return;
+    }
+
+    // Cargar datos del agricultor
+    const farmer = await db.getFarmer(tokenData.farmerId);
+    const plots = await db.getPlotsByFarmerId(tokenData.farmerId);
+    const creditScore = await db.getCreditScoreByFarmerId(tokenData.farmerId);
+    const recentActivity = await db.getRiskLogsByFarmerId(tokenData.farmerId, 5);
+
+    if (farmer && creditScore) {
+      setProfile({
+        farmer,
+        plots,
+        creditScore,
+        recentActivity,
+      });
       setIsValidToken(true);
-    } else {
-      alert('Token inválido');
+
+      // Actualizar contador de accesos
+      await db.updateToken(tokenData.id, {
+        accessCount: tokenData.accessCount + 1,
+        lastAccessedAt: new Date().toISOString(),
+      });
     }
   };
 
@@ -96,6 +89,9 @@ export default function BankViewPage() {
                 onChange={(e) => setToken(e.target.value)}
                 required
               />
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Tokens de prueba: <code className="bg-gray-100 px-2 py-1 rounded">a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</code>
+              </p>
             </div>
 
             <button
@@ -118,6 +114,8 @@ export default function BankViewPage() {
     );
   }
 
+  if (!profile) return <div>Cargando...</div>;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Header */}
@@ -139,9 +137,9 @@ export default function BankViewPage() {
           <div className="flex items-start justify-between mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-1">
-                {profile.fullName}
+                {profile.farmer.fullName}
               </h2>
-              <p className="text-gray-600">{profile.farmName}</p>
+              <p className="text-gray-600">{profile.farmer.farmName}</p>
             </div>
             <div className={`px-4 py-2 rounded-full border-2 ${getRiskBadge(profile.creditScore.riskLevel)}`}>
               <span className="text-sm font-bold">
@@ -156,7 +154,7 @@ export default function BankViewPage() {
               <div>
                 <p className="text-xs text-gray-500">Ubicación</p>
                 <p className="text-sm font-semibold text-gray-800">
-                  {profile.municipality}, {profile.department}
+                  {profile.farmer.municipality}, {profile.farmer.department}
                 </p>
               </div>
             </div>
@@ -166,17 +164,7 @@ export default function BankViewPage() {
               <div>
                 <p className="text-xs text-gray-500">Hectáreas</p>
                 <p className="text-sm font-semibold text-gray-800">
-                  {profile.totalHectares} ha
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <div>
-                <p className="text-xs text-gray-500">Miembro desde</p>
-                <p className="text-sm font-semibold text-gray-800">
-                  {new Date(profile.memberSince).getFullYear()}
+                  {profile.creditScore.totalHectares} ha
                 </p>
               </div>
             </div>
@@ -184,9 +172,18 @@ export default function BankViewPage() {
             <div className="flex items-center gap-3">
               <CheckCircle className="w-5 h-5 text-gray-400" />
               <div>
+                <p className="text-xs text-gray-500">Parcelas</p>
+                <p className="text-sm font-semibold text-gray-800">
+                  {profile.creditScore.totalPlots}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div>
                 <p className="text-xs text-gray-500">Zona de Riesgo</p>
                 <p className="text-sm font-semibold text-gray-800">
-                  Nivel {profile.riskZoneLevel}/5
+                  Nivel {profile.farmer.riskZoneLevel}/5
                 </p>
               </div>
             </div>
@@ -219,7 +216,7 @@ export default function BankViewPage() {
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-green-500"
-                    style={{ width: `${(profile.creditScore.climateResilienceScore / 50) * 100}%` }}
+                    style={{ width: `${((profile.creditScore.climateResilienceScore || 0) / 50) * 100}%` }}
                   />
                 </div>
               </div>
@@ -232,7 +229,7 @@ export default function BankViewPage() {
                 <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500"
-                    style={{ width: `${(profile.creditScore.financialCommitmentScore / 30) * 100}%` }}
+                    style={{ width: `${((profile.creditScore.financialCommitmentScore || 0) / 30) * 100}%` }}
                   />
                 </div>
               </div>
@@ -241,7 +238,7 @@ export default function BankViewPage() {
                 <div className="p-4 bg-green-50 rounded-xl">
                   <p className="text-sm text-gray-600 mb-1">NDVI Promedio</p>
                   <p className="text-2xl font-bold text-green-700">
-                    {profile.creditScore.avgNdvi.toFixed(2)}
+                    {profile.creditScore.avgNdvi?.toFixed(2)}
                   </p>
                 </div>
                 <div className="p-4 bg-blue-50 rounded-xl">
@@ -259,10 +256,10 @@ export default function BankViewPage() {
         <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-100">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Parcelas Registradas</h3>
           <div className="space-y-3">
-            {profile.plots.map((plot, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            {profile.plots.map((plot) => (
+              <div key={plot.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                 <div>
-                  <p className="font-semibold text-gray-800">{plot.name}</p>
+                  <p className="font-semibold text-gray-800">{plot.plotName}</p>
                   <p className="text-sm text-gray-600">{plot.cropType} • {plot.hectares} ha</p>
                 </div>
                 {plot.certifiedSeeds ? (
@@ -285,12 +282,12 @@ export default function BankViewPage() {
         <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-gray-100">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Inversión en Prevención</h3>
           <div className="space-y-3">
-            {profile.recentActivity.map((activity, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 border-l-4 border-green-500 bg-gray-50 rounded-r-xl">
+            {profile.recentActivity.map((activity) => (
+              <div key={activity.id} className="flex items-center justify-between p-4 border-l-4 border-green-500 bg-gray-50 rounded-r-xl">
                 <div>
-                  <p className="font-semibold text-gray-800">{activity.action}</p>
+                  <p className="font-semibold text-gray-800">{activity.description.substring(0, 60)}...</p>
                   <p className="text-sm text-gray-500">
-                    {new Date(activity.date).toLocaleDateString('es-CO', {
+                    {new Date(activity.loggedAt).toLocaleDateString('es-CO', {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric',
@@ -298,7 +295,7 @@ export default function BankViewPage() {
                   </p>
                 </div>
                 <p className="text-lg font-bold text-green-600">
-                  ${(activity.investment / 1000).toFixed(0)}k
+                  ${((activity.cost || 0) / 1000).toFixed(0)}k
                 </p>
               </div>
             ))}
@@ -306,7 +303,7 @@ export default function BankViewPage() {
 
           <div className="mt-4 p-4 bg-blue-50 rounded-xl">
             <p className="text-sm font-semibold text-blue-800">
-              Inversión Total (6 meses): ${(profile.recentActivity.reduce((sum, a) => sum + a.investment, 0) / 1000).toFixed(0)}k COP
+              Inversión Total (últimos reportes): ${(profile.recentActivity.reduce((sum, a) => sum + (a.cost || 0), 0) / 1000).toFixed(0)}k COP
             </p>
           </div>
         </div>

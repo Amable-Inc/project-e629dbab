@@ -1,0 +1,50 @@
+[
+  {
+    "id": "plot-1",
+    "farmerId": "farmer-1",
+    "plotName": "Lote Norte",
+    "hectares": 5.0,
+    "cropType": "Arroz",
+    "plantingDate": "2023-08-15",
+    "expectedHarvestDate": "2024-02-15",
+    "latitude": 8.7480,
+    "longitude": -75.8815,
+    "soilType": "Arcilloso",
+    "irrigationSystem": "Inundación",
+    "certifiedSeeds": true,
+    "createdAt": "2023-08-10T09:00:00Z",
+    "updatedAt": "2023-08-10T09:00:00Z"
+  },
+  {
+    "id": "plot-2",
+    "farmerId": "farmer-1",
+    "plotName": "Lote Sur",
+    "hectares": 4.5,
+    "cropType": "Maíz",
+    "plantingDate": "2023-09-01",
+    "expectedHarvestDate": "2024-01-20",
+    "latitude": 8.7470,
+    "longitude": -75.8820,
+    "soilType": "Franco",
+    "irrigationSystem": "Aspersión",
+    "certifiedSeeds": true,
+    "createdAt": "2023-08-25T10:30:00Z",
+    "updatedAt": "2023-08-25T10:30:00Z"
+  },
+  {
+    "id": "plot-3",
+    "farmerId": "farmer-1",
+    "plotName": "Parcela Este",
+    "hectares": 3.0,
+    "cropType": "Café",
+    "plantingDate": "2022-05-10",
+    "expectedHarvestDate": "2024-11-30",
+    "latitude": 8.7485,
+    "longitude": -75.8810,
+    "soilType": "Franco-arcilloso",
+    "irrigationSystem": "Goteo",
+    "certifiedSeeds": false,
+    "createdAt": "2022-05-05T08:00:00Z",
+    "updatedAt": "2022-05-05T08:00:00Z"
+  }
+]

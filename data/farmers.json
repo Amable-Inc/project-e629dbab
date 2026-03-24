@@ -1,0 +1,36 @@
+[
+  {
+    "id": "farmer-1",
+    "userId": "user-1",
+    "fullName": "Juan Pérez García",
+    "phone": "+57 300 123 4567",
+    "email": "juan.perez@ejemplo.com",
+    "documentId": "1234567890",
+    "farmName": "Finca El Progreso",
+    "farmAddress": "Vereda Las Flores, Km 8",
+    "latitude": 8.7479,
+    "longitude": -75.8814,
+    "municipality": "Montería",
+    "department": "Córdoba",
+    "riskZoneLevel": 2,
+    "createdAt": "2023-03-15T10:00:00Z",
+    "updatedAt": "2024-01-15T14:30:00Z"
+  },
+  {
+    "id": "farmer-2",
+    "userId": "user-2",
+    "fullName": "María González",
+    "phone": "+57 301 987 6543",
+    "email": "maria.gonzalez@ejemplo.com",
+    "documentId": "0987654321",
+    "farmName": "Finca La Esperanza",
+    "farmAddress": "Vereda El Carmen",
+    "latitude": 8.7580,
+    "longitude": -75.8900,
+    "municipality": "Cereté",
+    "department": "Córdoba",
+    "riskZoneLevel": 3,
+    "createdAt": "2023-05-20T08:00:00Z",
+    "updatedAt": "2024-01-14T16:45:00Z"
+  }
+]

@@ -1,61 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Share2, Copy, CheckCircle, Clock, Eye } from 'lucide-react';
 import Link from 'next/link';
-
-// Mock data
-const mockActiveTokens = [
-  {
-    id: '1',
-    token: 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
-    bankName: 'Banco Agrario',
-    grantedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
-    accessCount: 3,
-    isActive: true,
-  },
-  {
-    id: '2',
-    token: 'x9y8z7w6v5u4t3s2r1q0p9o8n7m6l5k4',
-    bankName: 'Bancolombia',
-    grantedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
-    expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-    accessCount: 1,
-    isActive: true,
-  },
-];
+import { db, type BankAccessToken } from '@/lib/db';
 
 export default function CompartirPage() {
-  const [tokens, setTokens] = useState(mockActiveTokens);
+  const [tokens, setTokens] = useState<BankAccessToken[]>([]);
   const [showNewTokenModal, setShowNewTokenModal] = useState(false);
   const [newBankName, setNewBankName] = useState('');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
-  const handleGenerateToken = () => {
+  useEffect(() => {
+    const currentFarmerId = 'farmer-1';
+    db.getTokensByFarmerId(currentFarmerId).then(setTokens);
+  }, []);
+
+  const handleGenerateToken = async () => {
     if (!newBankName.trim()) {
       alert('Por favor ingresa el nombre del banco');
       return;
     }
 
     // Generar token simulado
-    const newToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
-    const token = {
-      id: Date.now().toString(),
-      token: newToken,
+    const newTokenValue = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+    const token = await db.createToken({
+      farmerId: 'farmer-1',
+      token: newTokenValue,
       bankName: newBankName,
-      grantedAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      accessCount: 0,
+      grantedAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       isActive: true,
-    };
+      accessCount: 0,
+    });
 
     setTokens([token, ...tokens]);
     setNewBankName('');
     setShowNewTokenModal(false);
     
     // Auto-copiar el token
-    handleCopyToken(newToken);
+    handleCopyToken(newTokenValue);
   };
 
   const handleCopyToken = (token: string) => {
@@ -64,14 +48,16 @@ export default function CompartirPage() {
     setTimeout(() => setCopiedToken(null), 2000);
   };
 
-  const handleRevokeToken = (tokenId: string) => {
+  const handleRevokeToken = async (tokenId: string) => {
     if (confirm('¿Estás seguro de que deseas revocar este token? El banco no podrá acceder más a tu perfil.')) {
+      await db.revokeToken(tokenId);
       setTokens(tokens.map(t => t.id === tokenId ? { ...t, isActive: false } : t));
     }
   };
 
-  const getDaysRemaining = (expiresAt: Date) => {
-    const days = Math.floor((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const getDaysRemaining = (expiresAt?: string) => {
+    if (!expiresAt) return 0;
+    const days = Math.floor((new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return days;
   };
 
@@ -183,7 +169,7 @@ export default function CompartirPage() {
                     <div>
                       <h3 className="text-lg font-bold text-gray-800">{token.bankName}</h3>
                       <p className="text-sm text-gray-500">
-                        Creado el {token.grantedAt.toLocaleDateString('es-CO')}
+                        Creado el {new Date(token.grantedAt).toLocaleDateString('es-CO')}
                       </p>
                     </div>
                     <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
